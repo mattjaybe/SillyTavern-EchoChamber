@@ -1,119 +1,62 @@
-# Discord Chat Extension for SillyTavern
+# EchoChamber for SillyTavern
 
-A SillyTavern extension that generates AI-powered "audience" reactions in various chat styles (Discord/Twitch, Twitter, News, MST3K, etc.) that appear below the chat input.
+**EchoChamber** (formerly DiscordChat) is a powerful SillyTavern extension that generates a dynamic, AI-powered "audience" feed reacting live to your story. Whether it's a salt-fueled Twitch chat, a viral Twitter thread, or a voyeuristic NSFW advisor, EchoChamber brings your world to life with highly customizable reactions.
 
-## Features
+![EchoChamber Preview](https://github.com/SillyTavern/Extension-DiscordChat/raw/main/preview.png) *(Placeholder for your actual preview image)*
 
-- **Multiple Chat Styles**: Discord/Twitch, Thoughtful/Verbose, Twitter/X, Breaking News, MST3K, and NSFW (Ava)
-- **Easy Customization**: All chat styles are plain markdown files that anyone can edit
-- **Ollama Support**: Use local Ollama models or SillyTavern's default generation
-- **Theme-Agnostic**: Automatically adapts to your SillyTavern theme
+## 🚀 Features
 
-## Installation
+- **Dynamic Chat Styles**: Choose from 10+ built-in personas or create your own.
+- **Multiple AI Backends**: High-performance support for **Ollama** and **OpenAI Compatible APIs** (KoboldCPP, LM Studio, vLLM, etc.).
+- **Quick Settings Bar**: Adjust user count and switch styles on the fly directly below the chat.
+- **Style Manager**: Import new styles, rename existing ones, or delete those you don't use via the settings panel.
+- **Discord-Lite Markdown**: Support for **bold**, *italics*, <u>underline</u>, ~~strikethrough~~, and `code` blocks within the feed.
+- **Theme Aware**: Automatically inherits your SillyTavern theme colors for emphasis (italics) and text, ensuring it always looks native.
+- **Multi-Paragraph Support**: Specific styles (like Ava and Kai) can generate long-form, multi-paragraph responses while staying in a single chat bubble.
 
-1. Copy the `Extension-DiscordChat` folder to `SillyTavern/data/default-user/extensions/third-party/`
-2. Restart SillyTavern or reload extensions
-3. Open Extension Settings and enable "Discord Chat"
+## 🎭 Built-in Styles
 
-## Configuration
+| Style | Description |
+|-------|-------------|
+| **Discord / Twitch** | High-energy, slang-heavy live chat reactions. |
+| **Lovable Idiots** | (Dumb & Dumber) Hilariously wrong interpretations from a group of idiots. |
+| **Doomscrollers** | Existential dread and gallows humor from the void. |
+| **Ava / Kai NSFW** | Erotic advisors (Female/Male) providing explicit, provocative commentary. |
+| **MST3K** | Sarcastic, roasting-heavy commentary. |
+| **Breaking News** | Dramatic ticker-style headlines reacting to plot twists. |
+| **Twitter / X** | Social media threads with hashtags and viral energy. |
+| **Thoughtful/Verbose** | Deep literary analysis and character study. |
+| **HypeBot** | A single, focused hyper-enthusiastic reaction. |
 
-### Basic Settings
+## 🛠 Installation
 
-- **Enable/Disable**: Toggle the extension on/off
-- **Source**: Choose between "Default" (SillyTavern's generation) or "Ollama" (local model)
-- **Style**: Select chat style (Twitch, Verbose, Twitter, News, MST3K, NSFW)
-- **User Count**: Number of chat messages to generate (1-20)
+1. Clone or download this repository into your SillyTavern extensions folder:
+   `SillyTavern/data/default-user/extensions/third-party/Extension-EchoChamber`
+2. Restart SillyTavern.
+3. Open **Extensions** (puzzle icon) -> **EchoChamber** to enable and configure.
 
-### Ollama Settings
+## ⚙️ Configuration
 
-If using Ollama:
-1. Set **Ollama URL** (default: `http://localhost:11434`)
-2. Select your preferred **Model** from the dropdown
-3. The extension will auto-detect running models
+### Generation Engines
+EchoChamber supports two main local providers:
+- **Ollama**: Automatically detects running models on your local instance.
+- **OpenAI Compatible**: Easily connect to **KoboldCPP**, **LM Studio**, or any v1-compatible endpoint. Includes convenient presets for common tools.
 
-## Customizing Chat Styles
+### Customization
+Every style is powered by a Markdown file in the `/chat-styles/` folder. You can:
+- **Edit existing prompts**: Tweak the instructions to change the "vibe" of any style.
+- **Import New Styles**: Use the "Import" button in the settings panel to quickly add `.md` prompt templates.
+- **Quick Bar**: Toggle the "Show Quick Settings Bar" to manage EchoChamber without leaving the main chat view.
 
-All chat styles are stored as **plain markdown files** in the `chat-styles/` folder. You can edit them with any text editor!
+## 📝 Custom Style Guide
+EchoChamber parses responses based on a simple `Username: Message` format. When writing a custom style:
+1. Ensure your prompt tells the AI to output in the `Name: Content` format.
+2. For single-message styles (like advisors), the extension will automatically group multi-paragraph responses into one bubble if the AI follows your paragraph rules.
 
-### Available Styles
+## 🔒 Requirements
+- SillyTavern 1.12.0 or higher.
+- A local LLM backend (Ollama, KoboldCPP, etc.).
 
-- **discordtwitch.md** - Hype, meme-filled Discord/Twitch chat
-- **thoughtfulverbose.md** - Analytical, detailed commentary  
-- **twitterx.md** - Viral-style tweets with hashtags
-- **breakingnews.md** - News ticker headlines
-- **mst3k.md** - Sarcastic roasting commentary
-- **nsfwava.md** - Suggestive commentary (NSFW)
-
-### Editing a Style
-
-1. Open the markdown file (e.g., `chat-styles/discordtwitch.md`)
-2. Edit the instructions as needed
-3. Save the file
-4. Restart SillyTavern or reload extensions
-5. The changes take effect immediately!
-
-**Example:**
-```markdown
-Generate a fake Discord/Twitch chat reacting live to whatever is happening in the story. 
-Output ONLY lines in this format:
-
-username: message
-
-Rules:
-* Messages feel like real chat: casual, funny, hype, chaotic, internet-native.
-* Use slang, typos, emojis, memes, reactions, short replies, etc.
-...
-```
-
-### Adding a New Style
-
-1. Create a new `.md` file in `chat-styles/` (e.g., `mystyle.md`)
-2. Write your prompt instructions
-3. Open `index.js` and find the `STYLE_FILES` object
-4. Add your style: `'mystyle': 'mystyle.md',`
-5. Open `settings.html` and add your style to the dropdown
-6. Restart SillyTavern
-
-## Prompt Writing Tips
-
-- **Be specific** about format (e.g., "username: message")
-- **Give examples** of tone and content
-- **Set clear rules** (length, style, constraints)
-- **Avoid ambiguity** - models follow literal instructions
-- **Test iteratively** - refine based on results
-
-## Troubleshooting
-
-**No messages generated:**
-- Check console (F12) for errors loading markdown files
-- Verify your Ollama connection if using local models
-- Ensure the markdown file exists in `chat-styles/`
-
-**Model outputs instructions instead of content:**
-- Simplify your prompt - be more direct
-- Add explicit "Output ONLY:" statements
-- Specify the exact format with examples
-
-**Generic usernames (User1, User2):**
-- Add more examples of creative usernames to your prompt
-- Explicitly state "Use creative usernames like..."
-
-**Messages don't match style:**
-- Refine the prompt to be more specific
-- Add more constraints or examples
-- Try a different model if using Ollama
-
-## Technical Details
-
-- **Prompt Loading**: Markdown files are loaded once and cached
-- **Format**: Raw markdown files are sent as system prompts
-- **Parsing**: Looks for "username: message" format
-- **Fallback**: If parsing fails, shows raw output or error
-
-## Credits
-
-Original HypeBot extension concept adapted for Discord-style chat with extensive customization and multiple styles.
-
-## License
-
-See LICENSE file for details.
+---
+**Created by Antigravity**  
+*Enhance your roleplay with a living, breathing audience.*
