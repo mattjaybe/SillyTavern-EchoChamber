@@ -451,21 +451,15 @@ Do NOT output "Here are the messages". Just the content.`;
             const currentProfileId = $('#connection_profiles').val() || extension_settings.connectionManager.selectedProfile;
             let swappedProfile = false;
 
-            console.log(`[EchoChamber] Profile state - Current: ${currentProfileId}, Target: ${targetProfileId}`);
-
             try {
                 // Swap to target profile if different from current
                 if (currentProfileId !== targetProfileId) {
-                    console.log(`[EchoChamber] Swapping profile: ${currentProfileId} -> ${targetProfileId}`);
                     $('#connection_profiles').val(targetProfileId);
                     document.getElementById('connection_profiles').dispatchEvent(new Event('change'));
                     await new Promise((resolve) => {
                         getContext().eventSource.once(getContext().event_types.CONNECTION_PROFILE_LOADED, resolve);
                     });
                     swappedProfile = true;
-                    console.log(`[EchoChamber] Profile swap complete. Swapped flag: ${swappedProfile}`);
-                } else {
-                    console.log(`[EchoChamber] Profiles match, no swap needed`);
                 }
 
                 // Use SillyTavern's /genraw slash command for generation
@@ -478,29 +472,16 @@ Do NOT output "Here are the messages". Just the content.`;
                 });
 
                 result = genResult?.pipe || '';
-                console.log(`[EchoChamber] Generation complete. Result length: ${result.length}`);
 
             } finally {
                 // Restore original profile if we swapped
-                console.log(`[EchoChamber] Finally block executing. swappedProfile: ${swappedProfile}, currentProfileId: "${currentProfileId}"`);
-
                 if (swappedProfile) {
-                    console.log(`[EchoChamber] Restoring original profile: "${currentProfileId}"`);
-                    const beforeRestore = extension_settings.connectionManager.selectedProfile;
-                    console.log(`[EchoChamber] Profile before restore: ${beforeRestore}`);
-
                     const restoreId = currentProfileId || '';
                     $('#connection_profiles').val(restoreId);
                     document.getElementById('connection_profiles').dispatchEvent(new Event('change'));
                     await new Promise((resolve) => {
                         getContext().eventSource.once(getContext().event_types.CONNECTION_PROFILE_LOADED, resolve);
                     });
-
-                    const afterRestore = extension_settings.connectionManager.selectedProfile;
-                    console.log(`[EchoChamber] Profile after restore: ${afterRestore}`);
-                    console.log(`[EchoChamber] Restoration ${afterRestore == restoreId ? 'SUCCESSFUL' : 'FAILED'}`);
-                } else {
-                    console.log(`[EchoChamber] Skipping restoration (swappedProfile: ${swappedProfile})`);
                 }
             }
         } else {
