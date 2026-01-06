@@ -530,6 +530,7 @@ Do NOT output "Here are the messages". Just the content.`;
             const rawResult = await generateRaw({
                 systemPrompt: systemPrompt,
                 prompt: truePrompt,
+                streaming: false
             });
             result = rawResult;
         }
