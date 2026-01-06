@@ -266,7 +266,13 @@ async function generateDiscordChat() {
 
     // Prepare prompt
     // Get last few messages for context
-    const history = chat.slice(-3).map(msg => `${msg.name}: ${msg.mes}`).join('\n');
+    const cleanMessage = (text) => {
+        if (!text) return '';
+        // Strip common reasoning/thinking tags used by models like Claude and DeepSeek
+        return text.replace(/<(thought|think|reasoning)>[\s\S]*?<\/\1>/gi, '').trim();
+    };
+
+    const history = chat.slice(-3).map(msg => `${msg.name}: ${cleanMessage(msg.mes)}`).join('\n');
 
     // Override userCount for specific styles
     let targetUserCount = parseInt(settings.userCount) || 5;
@@ -384,7 +390,8 @@ Do NOT output "Here are the messages". Just the content.`;
                             { role: 'user', content: truePrompt }
                         ],
                         temperature: 0.7,
-                        max_tokens: 500
+                        max_tokens: 500,
+                        stream: false
                     }),
                     signal: abortController.signal
                 });
@@ -403,7 +410,8 @@ Do NOT output "Here are the messages". Just the content.`;
                             { role: 'user', content: truePrompt }
                         ],
                         temperature: 0.7,
-                        max_tokens: 500
+                        max_tokens: 500,
+                        stream: false
                     }),
                     signal: abortController.signal
                 });
@@ -434,7 +442,8 @@ Do NOT output "Here are the messages". Just the content.`;
             const rawResult = await generateRaw({
                 prompt: truePrompt,
                 use_mancer: false,
-                forcePreset: settings.preset
+                forcePreset: settings.preset,
+                streaming: false
             });
             result = rawResult;
 
