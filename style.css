@@ -1,211 +1,624 @@
-/* Main Container */
+/* EchoChamber Clean Overhaul CSS */
+
+/* --- Variables & Theme --- */
+:root {
+    --ec-bg: var(--SmartThemeBlurTintColor, rgba(20, 20, 25, 0.85));
+    --ec-border: var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.15));
+    --ec-text: var(--SmartThemeBodyColor, #dcddde);
+    --ec-accent: var(--SmartThemeQuoteColor, #43b581);
+    --ec-hover: rgba(255, 255, 255, 0.1);
+    --ec-radius: 8px;
+    --ec-header-height: 40px;
+    --ec-selection-bg: rgba(255, 255, 255, 0.15);
+}
+
+/* --- Main Container --- */
 #discordBar {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--ec-border);
+    overflow: visible;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    transition: width 0.1s, height 0.1s;
+    border-radius: var(--ec-radius);
+    /* Default background - will be overwritten by JS when opacity is applied */
+    background: rgba(20, 20, 25, 0.85);
+}
+
+/* ========================================= */
+/* PANEL POSITIONING & LAYOUT               */
+/* ========================================= */
+
+/* Position: BOTTOM (Default) - Flows with send_form */
+#discordBar.ec_bottom {
+    position: relative;
     width: 100%;
     margin-top: 10px;
-    display: block !important;
-    order: 9999;
-    clear: both;
-}
-
-#discordContent {
-    width: 100%;
-    /* User adjustable height */
-    height: 250px;
-    min-height: 60px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.discord_container {
-    flex-grow: 1;
-    width: 100%;
-    max-width: 100%;
-    /* Use transparency to blend with User's theme, but ensure readability */
-    background-color: rgba(30, 30, 35, 0.6);
-    color: var(--SmartThemeBodyColor, #dcddde);
-    /* Attempt to use theme variable, fallback to discord gray */
-    font-family: 'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    border-radius: 0 0 8px 8px;
-    font-size: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    overflow-y: auto;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: none;
-    backdrop-filter: blur(5px);
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-.discord_resize_handle {
-    width: 100%;
-    height: 12px;
-    cursor: ns-resize;
-    background: rgba(128, 128, 128, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
-    user-select: none;
-    touch-action: none;
     flex-shrink: 0;
-    z-index: 10;
+    border-top-left-radius: var(--ec-radius);
+    border-top-right-radius: var(--ec-radius);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
-.discord_resize_handle:hover,
-.discord_resize_handle.resizing {
-    background: rgba(128, 128, 128, 0.4);
+/* Position: TOP - Fixed at top of viewport */
+#discordBar.ec_top {
+    position: fixed;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--sheld-width, var(--sheldWidth, 95%));
+    max-width: 1200px;
+    z-index: 2000;
+    border-bottom-left-radius: var(--ec-radius);
+    border-bottom-right-radius: var(--ec-radius);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
-.discord_resize_handle::after {
-    content: "";
-    width: 32px;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 2px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.discord_status_container {
-    padding: 20px;
+/* Position: LEFT - Fixed on left side */
+#discordBar.ec_left {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh !important;
+    min-width: 200px;
+    border-right: 1px solid var(--ec-border);
+    border-radius: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    margin: 10px;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-    flex-grow: 1;
 }
 
-.discord_status_msg {
-    font-size: 0.95em;
-    opacity: 0.9;
+/* Position: RIGHT - Fixed on right side */
+#discordBar.ec_right {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    height: 100vh !important;
+    min-width: 200px;
+    border-left: 1px solid var(--ec-border);
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Collapsed State */
+#discordBar.ec_collapsed #discordContent,
+#discordBar.ec_collapsed .ec_resize_handle,
+#discordBar.ec_collapsed .ec_style_indicator,
+#discordBar.ec_collapsed .ec_status_overlay {
+    display: none !important;
+}
+
+#discordBar.ec_collapsed {
+    height: auto !important;
+    bottom: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+#discordBar.ec_collapsed #discordQuickSettings {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 4px !important;
+}
+
+/* --- Header & Controls --- */
+#discordQuickSettings {
+    height: var(--ec-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--ec-border);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    /* Default background - will be overwritten by JS when opacity is applied */
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.ec_header_left {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--SmartThemeQuoteColor);
-    animation: discord_pulse 2s infinite ease-in-out;
+    flex: 1;
+    min-width: 0;
 }
 
-#discord_stop_btn {
-    background: rgba(240, 71, 71, 0.15);
-    border: 1px solid rgba(240, 71, 71, 0.4);
-    color: #f04747;
-    padding: 6px 16px;
-    border-radius: 5px;
-    font-size: 0.85em;
-    cursor: pointer;
+.ec_header_right {
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
-    font-weight: 600;
+    gap: 2px;
+    flex-shrink: 0;
 }
 
-#discord_stop_btn:hover {
-    background: rgba(240, 71, 71, 0.3);
-    border-color: rgba(240, 71, 71, 0.6);
-    transform: translateY(-1px);
-}
-
-#discord_stop_btn:active {
-    transform: translateY(0);
-}
-
-@keyframes discord_pulse {
-    0% {
-        opacity: 0.6;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0.6;
-    }
-}
-
-.discord_status {
-    padding: 15px;
-    font-style: italic;
-    opacity: 0.7;
-    text-align: center;
-    font-size: 0.9em;
-    flex-grow: 1;
+/* Toggle Button (Power/Check) */
+.ec_toggle_btn {
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* Scrollbar */
-.discord_container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-.discord_container::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    color: var(--ec-accent);
+    transition: opacity 0.2s;
+    flex-shrink: 0;
     border-radius: 4px;
 }
 
-/* Messages */
+.ec_toggle_btn:hover {
+    background: var(--ec-hover);
+}
+
+/* Icon Buttons (all same style) */
+.ec_btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--ec-accent);
+    opacity: 0.7;
+    transition: background 0.2s, opacity 0.2s;
+    font-size: 0.9em;
+    position: relative;
+}
+
+.ec_btn:hover,
+.ec_btn.active {
+    background: var(--ec-hover);
+    opacity: 1;
+}
+
+/* --- Content Area --- */
+#discordContent {
+    /* flex: 1 removed to prevent auto-expansion */
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding: 4px 0;
+    min-height: 60px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+#discordContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+#discordContent::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+/* Side Panel Content - fills available height and scrolls */
+#discordBar.ec_left #discordContent,
+#discordBar.ec_right #discordContent {
+    flex: 1;
+    min-height: 0;
+    height: auto !important;
+    overflow-y: auto;
+}
+
+/* ========================================= */
+/* MESSAGE LAYOUT                            */
+/* ========================================= */
+
+.discord_message {
+    display: flex;
+    gap: 10px;
+    padding: 6px 12px;
+    position: relative;
+}
+
+.discord_avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.discord_body {
+    flex: 1;
+    min-width: 0;
+}
+
+.discord_header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.discord_username {
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.discord_timestamp {
+    font-size: 0.75em;
+    color: rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+}
+
+.discord_content {
+    margin-top: 2px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+/* Side Panel Message Adjustments - Float Layout */
+#discordBar.ec_left .discord_message,
+#discordBar.ec_right .discord_message {
+    display: block;
+    overflow: hidden;
+    /* Clearfix for floats */
+    padding: 8px 10px;
+}
+
+#discordBar.ec_left .discord_avatar,
+#discordBar.ec_right .discord_avatar {
+    float: left;
+    margin-right: 8px;
+    margin-bottom: 2px;
+}
+
+#discordBar.ec_left .discord_body,
+#discordBar.ec_right .discord_body {
+    display: block;
+    overflow: hidden;
+    /* Clear floats containment if needed, or let text wrap */
+    /* To let text wrap UNDER avatar, we must NOT establish a new block formatting context (so no overflow hidden) */
+    overflow: visible;
+}
+
+#discordBar.ec_left .discord_header,
+#discordBar.ec_right .discord_header {
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
+#discordBar.ec_left .discord_content,
+#discordBar.ec_right .discord_content {
+    display: block;
+    margin-top: 0;
+}
+
+/* Hide timestamps in side panels */
+#discordBar.ec_left .discord_timestamp,
+#discordBar.ec_right .discord_timestamp {
+    display: none;
+}
+
+/* Status Overlay - Floats over content */
+.ec_status_overlay {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid var(--ec-border);
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 100;
+    font-size: 0.85em;
+    white-space: nowrap;
+    width: fit-content;
+    max-width: 90%;
+}
+
+.ec_status_overlay.active {
+    display: flex;
+}
+
+/* Style Indicator Bar */
+.ec_style_indicator {
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--ec-border);
+    padding: 4px 12px;
+    font-size: 0.75em;
+    color: var(--ec-text);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: visible;
+    /* For dropdown positioning */
+}
+
+/* Make style indicator clickable when it's a dropdown trigger */
+.ec_style_dropdown_trigger {
+    cursor: pointer;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.ec_style_dropdown_trigger:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.ec_style_dropdown_trigger.active {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.ec_dropdown_arrow {
+    margin-left: auto;
+    font-size: 0.9em;
+    opacity: 0.7;
+    transition: transform 0.2s;
+}
+
+.ec_style_dropdown_trigger.active .ec_dropdown_arrow {
+    transform: rotate(180deg);
+}
+
+.ec_style_indicator i:first-child {
+    color: var(--SmartThemeQuoteColor, #4a9);
+}
+
+/* Position the indicator menu - now appended to body with fixed positioning */
+.ec_indicator_menu,
+#ec_style_menu_body {
+    position: fixed;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 0 0 8px 8px;
+    z-index: 100000;
+    display: none;
+    background: var(--SmartThemeBlurTintColor, #1a1b1e);
+    border: 1px solid var(--ec-border, rgba(255, 255, 255, 0.15));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Cancel button with subtle glow animation */
+.ec_status_btn {
+    background: rgba(240, 71, 71, 0.2);
+    color: #ff5555;
+    border: 1px solid rgba(240, 71, 71, 0.4);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s, box-shadow 0.3s;
+    animation: glow-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 4px 1px rgba(255, 85, 85, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 12px 3px rgba(255, 85, 85, 0.5);
+    }
+}
+
+.ec_status_btn:hover {
+    background: rgba(240, 71, 71, 0.35);
+    animation: none;
+    box-shadow: 0 0 8px 2px rgba(255, 85, 85, 0.4);
+}
+
+/* --- Resize Handle --- */
+.ec_resize_handle {
+    flex-shrink: 0;
+    z-index: 2001;
+    transition: background 0.2s;
+    position: relative;
+    user-select: none;
+    touch-action: none;
+}
+
+/* Visual grab indicator - centered dots/line */
+.ec_resize_handle::before {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    transition: background 0.2s;
+}
+
+.ec_resize_handle:hover::before,
+.ec_resize_handle.resizing::before {
+    background: var(--ec-accent);
+}
+
+/* Specific Handle Positions */
+/* Bottom Layout: Handle at TOP of bar (absolute positioned) */
+#discordBar.ec_bottom .ec_resize_handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 12px;
+    cursor: ns-resize;
+    background: linear-gradient(to bottom, rgba(128, 128, 128, 0.3), transparent);
+    border-radius: var(--ec-radius) var(--ec-radius) 0 0;
+}
+
+#discordBar.ec_bottom .ec_resize_handle::before {
+    width: 40px;
+    height: 4px;
+    left: 50%;
+    top: 4px;
+    transform: translateX(-50%);
+}
+
+/* Top Layout: Handle at BOTTOM of bar (absolute positioned) */
+#discordBar.ec_top .ec_resize_handle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 12px;
+    cursor: ns-resize;
+    background: linear-gradient(to top, rgba(128, 128, 128, 0.3), transparent);
+    border-radius: 0 0 var(--ec-radius) var(--ec-radius);
+}
+
+#discordBar.ec_top .ec_resize_handle::before {
+    width: 40px;
+    height: 4px;
+    left: 50%;
+    bottom: 4px;
+    transform: translateX(-50%);
+}
+
+/* Left Layout: Handle at Right */
+#discordBar.ec_left .ec_resize_handle {
+    height: 100%;
+    width: 10px;
+    cursor: ew-resize;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: linear-gradient(to right, transparent, rgba(128, 128, 128, 0.3));
+}
+
+#discordBar.ec_left .ec_resize_handle::before {
+    width: 4px;
+    height: 40px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Right Layout: Handle at Left */
+#discordBar.ec_right .ec_resize_handle {
+    height: 100%;
+    width: 10px;
+    cursor: ew-resize;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: linear-gradient(to left, transparent, rgba(128, 128, 128, 0.3));
+}
+
+#discordBar.ec_right .ec_resize_handle::before {
+    width: 4px;
+    height: 40px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Add padding to accommodate absolute resize handle */
+#discordBar.ec_bottom {
+    padding-top: 12px;
+}
+
+#discordBar.ec_top {
+    padding-bottom: 12px;
+}
+
+/* --- Menus (User Count / Font / Position / Style) --- */
+.ec_popup_menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    background: var(--SmartThemeBlurTintColor, #1a1b1e);
+    border: 1px solid var(--ec-border);
+    border-radius: 6px;
+    padding: 5px;
+    display: none;
+    z-index: 10000;
+    margin-top: 5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Ensure menus have high z-index to appear above ST UI */
+.ec_popup_menu,
+.ec_indicator_menu {
+    z-index: 10000;
+}
+
+.ec_btn.open .ec_popup_menu {
+    display: block;
+}
+
+/* Menu opens upward when panel is at bottom */
+#discordBar.ec_bottom .ec_popup_menu {
+    top: auto;
+    bottom: 100%;
+    margin-bottom: 4px;
+    margin-top: 0;
+}
+
+.ec_menu_item {
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9em;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+
+.ec_menu_item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Better selection highlight - subtle and readable */
+.ec_menu_item.selected {
+    background: var(--ec-selection-bg);
+    color: #fff;
+    font-weight: 600;
+    position: relative;
+}
+
+/* Left accent bar on selected item */
+.ec_menu_item.selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background: var(--ec-accent);
+    border-radius: 2px;
+}
+
+
+/* --- Message Styling --- */
 .discord_message {
     display: flex;
     align-items: flex-start;
-    /* Align top for multi-line messages */
     padding: 4px 16px;
-    /* Discord spacious padding */
     margin-top: 2px;
     line-height: 1.375rem;
 }
 
-/*.discord_message:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-} */
-
-/* Status Overlay (Typing/Processing) */
-/* Status Overlay (Typing/Processing) */
-.discord_status_overlay {
-    padding: 8px 24px;
-    margin: 10px auto;
-    width: fit-content;
-    border-radius: 50px;
-    font-size: 0.95em;
-    background-color: rgba(20, 20, 25, 0.9);
-    /* 90% opaque dark background */
-    color: var(--SmartThemeQuoteColor);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    animation: discord_fade_in 0.3s ease-out;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-@keyframes discord_fade_in {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Avatar - RESTORED */
 .discord_avatar {
     width: 40px;
     height: 40px;
@@ -218,12 +631,20 @@
     color: white;
     font-weight: 500;
     font-size: 18px;
-    cursor: pointer;
+    cursor: default;
     user-select: none;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Message Body */
+/* Smaller avatars for side panels */
+#discordBar.ec_left .discord_avatar,
+#discordBar.ec_right .discord_avatar {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
 .discord_body {
     flex-grow: 1;
     min-width: 0;
@@ -238,12 +659,7 @@
 .discord_username {
     font-weight: 600;
     font-size: 1rem;
-    cursor: pointer;
-    /* Color handled by JS */
-}
-
-.discord_username:hover {
-    text-decoration: underline;
+    cursor: default;
 }
 
 .discord_timestamp {
@@ -254,7 +670,6 @@
     font-weight: 400;
 }
 
-/* Content */
 .discord_content {
     color: var(--SmartThemeBodyColor, #dcddde);
     opacity: 0.95;
@@ -281,22 +696,546 @@
     font-family: monospace;
 }
 
-/* Settings styling */
-.discord_settings hr {
-    border-color: rgba(128, 128, 128, 0.3);
-    margin: 10px 0;
+/* --- Status Messages --- */
+.discord_status {
+    text-align: center;
+    padding: 20px;
+    color: var(--ec-text);
+    opacity: 0.7;
+    font-style: italic;
 }
 
-#discord_ollama_status {
-    margin-top: 5px;
+/* Cancelled state - uses theme accent color */
+.discord_status.ec_cancelled {
+    color: var(--SmartThemeQuoteColor, var(--ec-accent, #43b581));
+    opacity: 1;
+    font-style: normal;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: ec_fade_in 0.3s ease-out;
+    transition: opacity 0.5s ease-out;
+}
+
+.discord_status.ec_cancelled.fade-out {
+    opacity: 0;
+}
+
+.discord_status.ec_cancelled i {
+    font-size: 1.1em;
+}
+
+/* Error state - uses theme colors */
+.discord_status.ec_error {
+    color: var(--SmartThemeEmColor, #f04747);
+    opacity: 0.9;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.discord_status.ec_error i {
+    font-size: 1.1em;
+}
+
+@keyframes ec_fade_in {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================= */
+/* STYLE EDITOR MODAL                        */
+/* ========================================= */
+
+.ec_modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+.ec_modal_overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ec_modal_content {
+    background: var(--SmartThemeBlurTintColor, #1a1a2e);
+    border: 1px solid var(--SmartThemeBorderColor, #333);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    transition: transform 0.2s;
+}
+
+.ec_modal_overlay.active .ec_modal_content {
+    transform: translateY(0);
+}
+
+.ec_modal_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, #333);
+    flex-shrink: 0;
+}
+
+.ec_modal_header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--SmartThemeBodyColor, #eee);
+    font-size: 1.1em;
+}
+
+.ec_modal_close {
+    background: none;
+    border: none;
+    color: var(--SmartThemeBodyColor, #eee);
+    font-size: 1.5em;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    padding: 4px 8px;
+}
+
+.ec_modal_close:hover {
+    opacity: 1;
+}
+
+.ec_modal_body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 400px;
+}
+
+.ec_style_sidebar {
+    width: 220px;
+    border-right: 1px solid var(--SmartThemeBorderColor, #333);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.ec_style_sidebar_header {
+    padding: 12px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, #333);
+    display: flex;
+    gap: 8px;
+}
+
+.ec_style_sidebar_header button {
+    flex: 1;
+    padding: 8px;
     font-size: 0.85em;
-    font-weight: bold;
 }
 
-.discord_ollama_connected {
-    color: #43b581;
+.ec_style_list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
 }
 
-.discord_ollama_disconnected {
-    color: #f04747;
+.ec_style_item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--SmartThemeBodyColor, #ddd);
+    transition: background 0.2s;
+    margin-bottom: 4px;
+    font-size: 0.9em;
+}
+
+.ec_style_item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ec_style_item.active {
+    background: rgba(255, 255, 255, 0.12);
+    border-left: 3px solid var(--SmartThemeQuoteColor, #4a9);
+    color: var(--SmartThemeBodyColor, #eee);
+}
+
+.ec_style_item.builtin i {
+    color: var(--SmartThemeQuoteColor, #4a9);
+}
+
+.ec_style_item.custom i {
+    color: #f9a825;
+}
+
+.ec_style_item.active i {
+    color: inherit;
+}
+
+.ec_style_main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    overflow: hidden;
+}
+
+.ec_style_name_row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.ec_style_name_input {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 1em;
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--SmartThemeBodyColor, #eee);
+}
+
+.ec_style_textarea {
+    flex: 1;
+    width: 100%;
+    padding: 14px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.9em;
+    line-height: 1.5;
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--SmartThemeBodyColor, #eee);
+    resize: none;
+}
+
+.ec_style_textarea:focus {
+    outline: none;
+    border-color: var(--SmartThemeQuoteColor, #4a9);
+}
+
+.ec_modal_footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--SmartThemeBorderColor, #333);
+    flex-shrink: 0;
+    gap: 10px;
+}
+
+.ec_modal_footer_left {
+    display: flex;
+    gap: 8px;
+}
+
+.ec_modal_footer_right {
+    display: flex;
+    gap: 8px;
+}
+
+/* Button icon spacing */
+.ec_modal_footer button i {
+    margin-right: 6px;
+}
+
+.ec_btn_danger {
+    background: #c0392b !important;
+    border-color: #a93226 !important;
+}
+
+.ec_btn_danger:hover {
+    background: #e74c3c !important;
+}
+
+.ec_btn_primary {
+    background: #2ecc71 !important;
+    border-color: #27ae60 !important;
+    color: #000 !important;
+    font-weight: 600;
+}
+
+.ec_btn_primary:hover {
+    background: #27ae60 !important;
+}
+
+.ec_empty_state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--SmartThemeBodyColor, #888);
+    opacity: 0.6;
+    text-align: center;
+    padding: 40px;
+}
+
+.ec_empty_state i {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+/* ============================================================
+   TEMPLATE CREATOR MODAL
+   ============================================================ */
+
+.ec_template_creator {
+    max-width: 650px !important;
+    width: 90vw !important;
+}
+
+.ec_template_tabs {
+    display: flex;
+    border-bottom: 1px solid var(--ec-border);
+    padding: 0 10px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.ec_tab_btn {
+    background: none;
+    border: none;
+    color: var(--SmartThemeBodyColor, #ccc);
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ec_tab_btn:hover {
+    color: var(--ec-accent);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.ec_tab_btn.active {
+    color: var(--ec-accent);
+    border-bottom-color: var(--ec-accent);
+}
+
+.ec_template_body {
+    padding: 15px 20px !important;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.ec_tab_content {
+    display: none;
+}
+
+.ec_tab_content.active {
+    display: block;
+}
+
+.ec_form_group {
+    margin-bottom: 15px;
+}
+
+.ec_form_group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--SmartThemeBodyColor, #ddd);
+    font-size: 0.9em;
+}
+
+.ec_form_group input[type="text"],
+.ec_form_group select,
+.ec_form_group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--ec-border);
+    border-radius: 6px;
+    color: var(--SmartThemeBodyColor, #fff);
+    font-size: 0.95em;
+    box-sizing: border-box;
+}
+
+.ec_form_group input[type="text"]:focus,
+.ec_form_group select:focus,
+.ec_form_group textarea:focus {
+    outline: none;
+    border-color: var(--ec-accent);
+}
+
+.ec_form_group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.ec_form_group small {
+    display: block;
+    margin-top: 4px;
+    color: var(--SmartThemeBodyColor, #888);
+    opacity: 0.7;
+    font-size: 0.8em;
+}
+
+.ec_form_row {
+    display: flex;
+    gap: 15px;
+}
+
+.ec_form_row .ec_form_group {
+    flex: 1;
+}
+
+.ec_checkbox_row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ec_checkbox_row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.ec_checkbox_row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ec-accent);
+}
+
+.ec_full_height textarea {
+    min-height: 250px;
+}
+
+/* Advanced tab - full height layout (only when active) */
+.ec_tab_content[data-tab="advanced"].active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.ec_tab_content[data-tab="advanced"] .ec_full_height {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ec_tab_content[data-tab="advanced"] .ec_full_height textarea {
+    flex: 1;
+    min-height: 300px;
+    resize: vertical;
+}
+
+/* Label row with action buttons */
+.ec_label_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.ec_label_row label {
+    margin-bottom: 0;
+}
+
+.ec_prompt_actions {
+    display: flex;
+    gap: 6px;
+}
+
+.ec_small_btn {
+    padding: 4px 10px !important;
+    font-size: 0.8em !important;
+}
+
+.ec_small_btn i {
+    margin-right: 4px;
+}
+
+/* Custom tone input hidden by default */
+#ec_tpl_custom_tone {
+    display: none;
+}
+
+/* ========================================= */
+/* TEMPLATE CREATOR MODAL - FULL WIDTH      */
+/* ========================================= */
+
+.ec_template_creator {
+    width: 90%;
+    max-width: 700px;
+}
+
+.ec_template_creator .ec_template_body {
+    padding: 20px !important;
+}
+
+.ec_template_creator .ec_tab_content {
+    width: 100%;
+}
+
+.ec_template_creator .ec_form_group {
+    width: 100%;
+}
+
+/* ========================================= */
+/* COLLAPSED PANEL - COMPACT FIXES          */
+/* ========================================= */
+
+/* Top panel collapsed - snug against ST menu */
+#discordBar.ec_top.ec_collapsed {
+    top: 35px !important;
+}
+
+#discordBar.ec_top.ec_collapsed #discordQuickSettings {
+    height: 28px !important;
+    min-height: 28px !important;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Bottom panel collapsed - minimal height */
+#discordBar.ec_bottom.ec_collapsed #discordQuickSettings {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 8px !important;
+}
+
+/* Side panels collapsed */
+#discordBar.ec_left.ec_collapsed #discordQuickSettings,
+#discordBar.ec_right.ec_collapsed #discordQuickSettings {
+    height: 28px !important;
+    min-height: 28px !important;
 }
